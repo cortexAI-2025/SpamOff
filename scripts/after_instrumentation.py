@@ -29,9 +29,11 @@ if api == "35":
         raise AssertionError("The Telecom emulator must have an ordinary dialer installed")
     run("adb", "shell", "cmd", "role", "add-role-holder", "--user", "0", "android.app.role.DIALER", dialer)
     print("TEST_DIALER=" + dialer, flush=True)
-    subprocess.run([sys.executable, "scripts/emulator_calls.py"], check=True, timeout=600)
+    calls = subprocess.run([sys.executable, "scripts/emulator_calls.py"], timeout=600)
     subprocess.run(["./gradlew", "assembleBeta"], check=True, timeout=900)
-    subprocess.run([sys.executable, "scripts/optimized_smoke.py"], check=True, timeout=600)
+    optimized = subprocess.run([sys.executable, "scripts/optimized_smoke.py"], timeout=600)
+    if calls.returncode != 0 or optimized.returncode != 0:
+        raise AssertionError(f"Telecom scenarios exit={calls.returncode}; optimized smoke exit={optimized.returncode}")
     apks = Path("app/build/reports/verified-apks")
     apks.mkdir(parents=True, exist_ok=True)
     shutil.copyfile("app/build/outputs/apk/debug/app-debug.apk", apks / "app-debug-tested.apk")

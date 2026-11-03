@@ -57,12 +57,23 @@ try:
             raise TimeoutError("Reboot timeout")
         time.sleep(2)
     adb("shell", "input", "keyevent", "82")
+    deadline = time.monotonic() + 120
+    while True:
+        holders = adb("shell", "cmd", "role", "get-role-holders", "--user", "0", "android.app.role.CALL_SCREENING")
+        users = adb("shell", "dumpsys", "user")
+        if "fr.spamoff" in holders and "RUNNING_UNLOCKED" in users:
+            print("Retained screening role restored after reboot: " + holders.strip(), flush=True)
+            break
+        if time.monotonic() > deadline:
+            raise TimeoutError("Screening role or unlocked user not restored after reboot: " + holders)
+        time.sleep(2)
+    time.sleep(2)
     call_case("blocking_after_reboot", None, True)
 except Exception:
     p = Path("app/build/reports/telecom-diagnostics.txt")
     p.parent.mkdir(parents=True, exist_ok=True)
     parts = []
-    for args in [("shell", "dumpsys", "telecom"), ("shell", "dumpsys", "telephony.registry"), ("logcat", "-d", "-t", "700")]:
+    for args in [("shell", "dumpsys", "role"), ("shell", "dumpsys", "user"), ("shell", "dumpsys", "telecom"), ("shell", "dumpsys", "telephony.registry"), ("logcat", "-d", "-t", "700")]:
         result = subprocess.run(["adb", *args], capture_output=True, text=True, timeout=60)
         parts.append(result.stdout + result.stderr)
     p.write_text("\n".join(parts))

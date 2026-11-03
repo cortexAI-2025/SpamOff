@@ -1,8 +1,13 @@
 name: Android V1
 on:
   push:
+    paths: ['app/**', 'data/**', '*.gradle.kts', 'gradle/**', 'gradlew', 'gradle.properties', '.github/workflows/**']
   pull_request:
+    paths: ['app/**', 'data/**', '*.gradle.kts', 'gradle/**', 'gradlew', 'gradle.properties', '.github/workflows/**']
   workflow_dispatch:
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -15,6 +20,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools platforms;android-36 build-tools;35.0.0
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
       - uses: actions/upload-artifact@v4

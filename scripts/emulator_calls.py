@@ -1,0 +1,64 @@
+"""Actual emulator Telecom callbacks, not a mock of the repository. API 35 CI only."""
+import json
+import subprocess
+import time
+from pathlib import Path
+
+NUMBER = "+33612345678"
+RUNNER = "fr.spamoff.test/androidx.test.runner.AndroidJUnitRunner"
+results = []
+
+def adb(*args, timeout=60):
+    p = subprocess.run(["adb", *args], capture_output=True, text=True, timeout=timeout)
+    if p.returncode:
+        raise RuntimeError(p.stderr + p.stdout)
+    return p.stdout
+
+def phase(value):
+    out = adb("shell", "am", "instrument", "-w", "-e", "class", "fr.spamoff.ScreeningHarnessTest", "-e", "phase", value, RUNNER)
+    if "OK (1 test)" not in out or "FAILURES" in out:
+        raise AssertionError(out)
+
+def call_case(name, config, blocked):
+    if config is not None:
+        phase(config)
+    try:
+        adb("emu", "gsm", "call", NUMBER)
+        time.sleep(3)
+        calls = adb("emu", "gsm", "list")
+        if blocked and NUMBER.lstrip("+") in calls:
+            raise AssertionError("Blocked incoming call still present: " + calls)
+        if not blocked and NUMBER.lstrip("+") not in calls:
+            raise AssertionError("Allowed incoming call absent: " + calls)
+        phase("assert-block" if blocked else "assert-allow")
+        results.append({"case": name, "result": "PASS"})
+        print(name + ": PASS", flush=True)
+    finally:
+        subprocess.run(["adb", "emu", "gsm", "cancel", NUMBER], capture_output=True, timeout=30)
+
+try:
+    call_case("personal_blacklist", "block", True)
+    call_case("whitelist_priority", "allow", False)
+    call_case("protection_disabled", "disabled", False)
+    adb("shell", "svc", "wifi", "disable")
+    adb("shell", "svc", "data", "disable")
+    call_case("offline_blocking", "block", True)
+    adb("shell", "svc", "wifi", "enable")
+    adb("shell", "svc", "data", "enable")
+    phase("block")
+    adb("reboot")
+    adb("wait-for-device", timeout=120)
+    deadline = time.monotonic() + 120
+    while adb("shell", "getprop", "sys.boot_completed").strip() != "1":
+        if time.monotonic() > deadline:
+            raise TimeoutError("Reboot timeout")
+        time.sleep(2)
+    adb("shell", "input", "keyevent", "82")
+    call_case("blocking_after_reboot", None, True)
+finally:
+    adb("shell", "svc", "wifi", "enable")
+    adb("shell", "svc", "data", "enable")
+    phase("cleanup")
+    destination = Path("app/build/reports/emulator-calls.json")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(results, indent=2) + "\n")

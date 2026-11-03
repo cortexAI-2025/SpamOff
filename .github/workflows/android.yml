@@ -1,9 +1,9 @@
 name: Android V1
 on:
   push:
-    paths: ['app/**', 'data/**', '*.gradle.kts', 'gradle/**', 'gradlew', 'gradle.properties', '.github/workflows/**']
+    paths: ['app/**', 'scripts/**', 'data/**', '*.gradle.kts', 'gradle/**', 'gradlew', 'gradle.properties', '.github/workflows/**']
   pull_request:
-    paths: ['app/**', 'data/**', '*.gradle.kts', 'gradle/**', 'gradlew', 'gradle.properties', '.github/workflows/**']
+    paths: ['app/**', 'scripts/**', 'data/**', '*.gradle.kts', 'gradle/**', 'gradlew', 'gradle.properties', '.github/workflows/**']
   workflow_dispatch:
 concurrency:
   group: android-${{ github.ref }}
@@ -56,6 +56,7 @@ jobs:
           disable-animations: true
           script: |
             ./gradlew connectedDebugAndroidTest
+            if [ "${{ matrix.api }}" = "35" ]; then python3 scripts/emulator_calls.py; fi
             mkdir -p app/build/reports/screenshots
             adb pull /sdcard/Android/data/fr.spamoff/files/home-api-${{ matrix.api }}.png app/build/reports/screenshots/
 
@@ -66,3 +67,4 @@ jobs:
           path: |
             app/build/reports/androidTests/
             app/build/reports/screenshots/
+            app/build/reports/emulator-calls.json

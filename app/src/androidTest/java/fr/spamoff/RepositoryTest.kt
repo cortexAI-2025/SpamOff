@@ -48,6 +48,16 @@ class RepositoryTest {
   assertEquals(initial,repo.dao.metadata())
   assertEquals(Verdict.AUTOMATED,repo.decide("0162123456"))
  }
+ @Test fun failureDuringInsertRollsBackDeletion() = runBlocking {
+  val initial=repo.dao.metadata()
+  db.openHelper.writableDatabase.execSQL("CREATE TRIGGER fail_insert BEFORE INSERT ON rules BEGIN SELECT RAISE(ABORT, 'injected failure'); END")
+  try {
+   repo.install(ValidatedFeed(2026110302, "Broken", listOf(Rule("+33163", "prefix"))))
+   fail("Injected write failure must reject the update")
+  } catch (_: android.database.sqlite.SQLiteException) { }
+  assertEquals(initial,repo.dao.metadata())
+  assertEquals(Verdict.AUTOMATED,repo.decide("0162123456"))
+ }
  @Test fun corruptionNeverReachesInstall() = runBlocking {
   val initial=repo.dao.metadata()
   try { val bad=FeedValidator.validate(context.assets.open("manifest.json").readBytes(),byteArrayOf(1,2)); repo.install(bad); fail() } catch(_:Exception) { }

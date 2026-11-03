@@ -54,9 +54,15 @@ jobs:
           api-level: ${{ matrix.api }}
           arch: x86_64
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
+          script: |
+            ./gradlew connectedDebugAndroidTest
+            mkdir -p app/build/reports/screenshots
+            adb pull /sdcard/Android/data/fr.spamoff/files/home-api-${{ matrix.api }}.png app/build/reports/screenshots/
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: instrumented-api-${{ matrix.api }}
-          path: app/build/reports/androidTests/
+          path: |
+            app/build/reports/androidTests/
+            app/build/reports/screenshots/

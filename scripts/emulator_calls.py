@@ -49,6 +49,9 @@ try:
     adb("shell", "svc", "wifi", "enable")
     adb("shell", "svc", "data", "enable")
     phase("block")
+    # End setup in an ordinary app session: instrumentation force-stops its target on exit.
+    adb("shell", "am", "start", "-n", "fr.spamoff/.MainActivity")
+    time.sleep(2)
     adb("reboot")
     adb("wait-for-device", timeout=120)
     deadline = time.monotonic() + 120

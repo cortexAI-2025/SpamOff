@@ -35,7 +35,9 @@ def configure(allow):
     text("Listes")
     tap_node(lambda n: n.get("class") == "android.widget.EditText")
     adb("shell", "input", "text", NUMBER)
-    adb("shell", "input", "keyevent", "4")
+    ime = adb("shell", "dumpsys", "input_method")
+    if re.search(r"(?:mInputShown|mIsInputViewShown)=true", ime):
+        adb("shell", "input", "keyevent", "4")
     text("Autoriser" if allow else "Bloquer")
     time.sleep(1)
     text("Accueil")

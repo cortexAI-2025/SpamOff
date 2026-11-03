@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 /** Driven only by scripts/emulator_calls.py after the ordinary integration suite. */
 @RunWith(AndroidJUnit4::class)
 class ScreeningHarnessTest {
- @Test fun scenario() = runBlocking {
+ @Test fun scenario(): Unit = runBlocking {
   val app=InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as SpamOffApp
   val phase=InstrumentationRegistry.getArguments().getString("phase")
   val prefs=app.getSharedPreferences("emulator-test",0)

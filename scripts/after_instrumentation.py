@@ -32,9 +32,10 @@ if api == "35":
     calls = subprocess.run([sys.executable, "scripts/emulator_calls.py"], timeout=600)
     subprocess.run(["./gradlew", "assembleBeta"], check=True, timeout=900)
     optimized = subprocess.run([sys.executable, "scripts/optimized_smoke.py"], timeout=600)
-    if calls.returncode != 0 or optimized.returncode != 0:
-        raise AssertionError(f"Telecom scenarios exit={calls.returncode}; optimized smoke exit={optimized.returncode}")
     apks = Path("app/build/reports/verified-apks")
     apks.mkdir(parents=True, exist_ok=True)
     shutil.copyfile("app/build/outputs/apk/debug/app-debug.apk", apks / "app-debug-tested.apk")
     shutil.copyfile("app/build/outputs/apk/beta/app-beta.apk", apks / "app-beta-tested.apk")
+
+    if calls.returncode != 0 or optimized.returncode != 0:
+        raise AssertionError(f"Telecom scenarios exit={calls.returncode}; optimized smoke exit={optimized.returncode}")

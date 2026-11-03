@@ -70,8 +70,18 @@ try:
         if time.monotonic() > deadline:
             raise TimeoutError("Screening role or unlocked user not restored after reboot: " + holders)
         time.sleep(2)
-    time.sleep(2)
-    call_case("blocking_after_reboot", None, True)
+    # Android roles being readable does not mean all Telecom/contact/carrier services finished boot.
+    # Keep SpamOff cold and do not reassign its role; exercise a call after platform settling.
+    time.sleep(30)
+    log_path = Path("app/build/reports/telecom-logcat.txt")
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("wb") as log_file:
+        logger = subprocess.Popen(["adb", "logcat", "-v", "threadtime", "-s", "Telecom:V", "TelecomFramework:V", "*:S"], stdout=log_file, stderr=subprocess.STDOUT)
+        try:
+            call_case("blocking_after_reboot", None, True)
+        finally:
+            logger.terminate()
+            logger.wait(timeout=20)
 except Exception:
     p = Path("app/build/reports/telecom-diagnostics.txt")
     p.parent.mkdir(parents=True, exist_ok=True)

@@ -54,6 +54,7 @@ jobs:
       - uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api }}
+          target: ${{ matrix.api == 35 && 'google_apis' || 'default' }}
           arch: x86_64
           disable-animations: true
           script: |
@@ -70,3 +71,4 @@ jobs:
             app/build/reports/emulator-calls.json
             app/build/reports/optimized-smoke.json
             app/build/reports/verified-apks/
+            app/build/reports/telecom-diagnostics.txt

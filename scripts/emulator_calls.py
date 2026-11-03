@@ -26,11 +26,11 @@ def call_case(name, config, blocked):
         adb("emu", "gsm", "call", NUMBER)
         time.sleep(3)
         calls = adb("emu", "gsm", "list")
+        phase("assert-block" if blocked else "assert-allow")
         if blocked and NUMBER.lstrip("+") in calls:
             raise AssertionError("Blocked incoming call still present: " + calls)
         if not blocked and NUMBER.lstrip("+") not in calls:
             raise AssertionError("Allowed incoming call absent: " + calls)
-        phase("assert-block" if blocked else "assert-allow")
         results.append({"case": name, "result": "PASS"})
         print(name + ": PASS", flush=True)
     finally:
@@ -55,6 +55,16 @@ try:
         time.sleep(2)
     adb("shell", "input", "keyevent", "82")
     call_case("blocking_after_reboot", None, True)
+except Exception:
+    p = Path("app/build/reports/telecom-diagnostics.txt")
+    p.parent.mkdir(parents=True, exist_ok=True)
+    parts = []
+    for args in [("shell", "dumpsys", "telecom"), ("shell", "dumpsys", "telephony.registry"), ("logcat", "-d", "-t", "700")]:
+        result = subprocess.run(["adb", *args], capture_output=True, text=True, timeout=60)
+        parts.append(result.stdout + result.stderr)
+    p.write_text("\n".join(parts))
+    print("\n".join(parts)[-18000:], flush=True)
+    raise
 finally:
     adb("shell", "svc", "wifi", "enable")
     adb("shell", "svc", "data", "enable")

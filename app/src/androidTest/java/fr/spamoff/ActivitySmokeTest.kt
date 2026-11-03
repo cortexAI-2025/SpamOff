@@ -31,7 +31,7 @@ class ActivitySmokeTest {
    scenario.onActivity { assertFalse(it.isFinishing) }
    val screen=instrumentation.uiAutomation.takeScreenshot()
    assertNotNull(screen)
-   File(context.getExternalFilesDir(null),"home-api-${Build.VERSION.SDK_INT}.png").outputStream().use {
+   File(context.filesDir,"home-api-${Build.VERSION.SDK_INT}.png").outputStream().use {
     screen!!.compress(Bitmap.CompressFormat.PNG,100,it)
    }
   }

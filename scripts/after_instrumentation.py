@@ -20,8 +20,15 @@ if "OK (1 test)" not in output or "FAILURES" in output:
     raise AssertionError(output)
 shots = Path("app/build/reports/screenshots")
 shots.mkdir(parents=True, exist_ok=True)
-run("adb", "pull", f"/sdcard/Android/data/fr.spamoff/files/home-api-{api}.png", str(shots))
+image = subprocess.run(["adb", "exec-out", "run-as", "fr.spamoff", "cat", f"files/home-api-{api}.png"], capture_output=True, check=True, timeout=60)
+(shots / f"home-api-{api}.png").write_bytes(image.stdout)
 if api == "35":
+    packages = run("adb", "shell", "pm", "list", "packages")
+    dialer = next((p for p in ("com.google.android.dialer", "com.android.dialer") if "package:" + p + "\n" in packages), None)
+    if dialer is None:
+        raise AssertionError("The Telecom emulator must have an ordinary dialer installed")
+    run("adb", "shell", "cmd", "role", "add-role-holder", "--user", "0", "android.app.role.DIALER", dialer)
+    print("TEST_DIALER=" + dialer, flush=True)
     subprocess.run([sys.executable, "scripts/emulator_calls.py"], check=True, timeout=600)
     subprocess.run(["./gradlew", "assembleBeta"], check=True, timeout=900)
     subprocess.run([sys.executable, "scripts/optimized_smoke.py"], check=True, timeout=600)

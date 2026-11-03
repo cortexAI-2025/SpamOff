@@ -17,8 +17,13 @@ android {
  }
  buildFeatures { compose = true; buildConfig = true }
  buildTypes {
-  debug { testProguardFiles("test-proguard-rules.pro"); isMinifyEnabled = true; isShrinkResources = true; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
+  debug { isMinifyEnabled = false }
   release { isMinifyEnabled = true; isShrinkResources = true; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
+  create("beta") {
+   initWith(getByName("release"))
+   signingConfig = signingConfigs.getByName("debug")
+   matchingFallbacks += "release"
+  }
  }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
  kotlinOptions { jvmTarget = "17" }

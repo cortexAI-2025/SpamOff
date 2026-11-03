@@ -23,12 +23,13 @@ jobs:
         with:
           packages: platform-tools platforms;android-36 build-tools;35.0.0
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease assembleDebugAndroidTest
+      - run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleBeta assembleRelease assembleDebugAndroidTest
       - uses: actions/upload-artifact@v4
         with:
           name: SpamOff-APK-and-reports
           path: |
             app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/beta/*.apk
             app/build/outputs/apk/release/*.apk
             app/build/reports/
   instrumented:
@@ -57,7 +58,11 @@ jobs:
           disable-animations: true
           script: |
             ./gradlew connectedDebugAndroidTest
-            if [ "${{ matrix.api }}" = "35" ]; then python3 scripts/emulator_calls.py; fi
+            if [ "${{ matrix.api }}" = "35" ]; then
+              python3 scripts/emulator_calls.py
+              ./gradlew assembleBeta
+              python3 scripts/optimized_smoke.py
+            fi
             mkdir -p app/build/reports/screenshots
             adb pull /sdcard/Android/data/fr.spamoff/files/home-api-${{ matrix.api }}.png app/build/reports/screenshots/
 
@@ -69,3 +74,4 @@ jobs:
             app/build/reports/androidTests/
             app/build/reports/screenshots/
             app/build/reports/emulator-calls.json
+            app/build/reports/optimized-smoke.json

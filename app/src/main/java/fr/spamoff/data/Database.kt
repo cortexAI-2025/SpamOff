@@ -29,7 +29,9 @@ interface SpamDao {
  @Query("DELETE FROM rules") suspend fun clearRules()
  @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun rules(rules: List<Rule>)
  @Query("SELECT rejected FROM stats WHERE id=1") fun rejected(): Flow<Long?>
- @Query("INSERT INTO stats(id,rejected) VALUES(1,1) ON CONFLICT(id) DO UPDATE SET rejected=rejected+1") suspend fun increment()
+ @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun ensureStats(stats: Stats)
+ @Query("UPDATE stats SET rejected=rejected+1 WHERE id=1") suspend fun incrementValue()
+ @Transaction suspend fun increment() { ensureStats(Stats()); incrementValue() }
  @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun report(report: LocalReport)
  @Query("DELETE FROM reports WHERE number=:number") suspend fun removeReport(number: String)
 }

@@ -29,11 +29,12 @@ Aucune permission Contacts, SMS, Micro ou Journal d’appels n’est demandée. 
 Installer Android Studio, JDK 17, SDK 36 et Build Tools 35.0.0. Configurer `ANDROID_HOME` ou `local.properties` (non versionné).
 
 ```sh
-./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
+./gradlew testDebugUnitTest lintDebug assembleDebug assembleBeta assembleRelease
 ./gradlew connectedDebugAndroidTest
 ```
 
-APK : `app/build/outputs/apk/debug/app-debug.apk` (signé avec la clé debug locale, réduit par R8).
+APK debug : `app/build/outputs/apk/debug/app-debug.apk` (signé avec la clé debug locale, non réduit pour permettre l’instrumentation).
+APK bêta léger : `app/build/outputs/apk/beta/app-beta.apk` (réduit/optimisé par R8, signé avec la même clé de test ; recommandé pour le Samsung A14).
 La variante release n’est pas signée : ne pas la distribuer avant la préparation de la clé du propriétaire.
 Pour mettre à jour un APK déjà installé, il faut conserver la même clé de signature. La clé debug temporaire de cette compilation n’est pas une clé de publication et n’est pas incluse dans Git.
 

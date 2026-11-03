@@ -75,5 +75,5 @@ class RepositoryTest {
   disk=Room.databaseBuilder(context,SpamDatabase::class.java,name).build()
   assertEquals(false,disk.dao().person("+33612345678")?.allowed); disk.close(); context.deleteDatabase(name)
  }
- @Test fun counterDoesNotStoreCallNumbers() = runBlocking { repo.dao.increment(); repo.dao.increment(); assertEquals(0,repo.dao.people().first().size) }
+ @Test fun counterDoesNotStoreCallNumbers() = runBlocking { repo.dao.increment(); repo.dao.increment(); assertEquals(2L,repo.dao.rejected().first()); assertEquals(0,repo.dao.people().first().size) }
 }

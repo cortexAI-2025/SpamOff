@@ -58,11 +58,7 @@ jobs:
           disable-animations: true
           script: |
             ./gradlew connectedDebugAndroidTest
-            if [ "${{ matrix.api }}" = "35" ]; then
-              python3 scripts/emulator_calls.py
-              ./gradlew assembleBeta
-              python3 scripts/optimized_smoke.py
-            fi
+            if [ "${{ matrix.api }}" = "35" ]; then python3 scripts/emulator_calls.py && ./gradlew assembleBeta && python3 scripts/optimized_smoke.py; fi
             mkdir -p app/build/reports/screenshots
             adb pull /sdcard/Android/data/fr.spamoff/files/home-api-${{ matrix.api }}.png app/build/reports/screenshots/
 

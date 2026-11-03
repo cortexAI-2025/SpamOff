@@ -57,6 +57,18 @@ try:
     assert any(n.get("text") == "SpamOff" for n in nodes())
     assert any(n.get("text") == "Protection activée" for n in nodes())
     results.append({"case": "optimized_install_and_launch", "result": "PASS"})
+    text("Actualiser les listes")
+    deadline = time.monotonic() + 70
+    while time.monotonic() < deadline:
+        texts = [n.get("text", "") for n in nodes()]
+        if "Listes vérifiées et actualisées" in texts:
+            results.append({"case": "optimized_https_update", "result": "PASS"})
+            break
+        if any("Actualisation impossible" in t for t in texts):
+            raise AssertionError("Optimized HTTPS update failed")
+        time.sleep(0.5)
+    else:
+        raise TimeoutError("Update confirmation not observed")
     configure(False)
     call(True)
     results.append({"case": "optimized_blacklist_callback", "result": "PASS"})

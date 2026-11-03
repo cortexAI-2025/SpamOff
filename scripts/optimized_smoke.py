@@ -19,20 +19,37 @@ def nodes():
     adb("shell", "uiautomator", "dump", "/sdcard/spamoff-ui.xml")
     return list(ET.fromstring(adb("shell", "cat", "/sdcard/spamoff-ui.xml")).iter("node"))
 
+def swipe(down):
+    sizes = re.findall(r"(\d+)x(\d+)", adb("shell", "wm", "size"))
+    width, height = map(int, sizes[-1])
+    y1, y2 = (int(height*0.70), int(height*0.25)) if down else (int(height*0.25), int(height*0.75))
+    adb("shell", "input", "swipe", str(width//2), str(y1), str(width//2), str(y2), "350")
+    time.sleep(0.4)
+
+def top():
+    for _ in range(3):
+        swipe(False)
+
 def tap_node(predicate):
-    for node in nodes():
-        if predicate(node):
-            x1, y1, x2, y2 = map(int, re.findall(r"\d+", node.attrib["bounds"]))
-            adb("shell", "input", "tap", str((x1+x2)//2), str((y1+y2)//2))
-            time.sleep(0.7)
-            return
-    raise AssertionError("UI node not found")
+    for attempt in range(5):
+        for node in nodes():
+            if predicate(node):
+                x1, y1, x2, y2 = map(int, re.findall(r"\d+", node.attrib["bounds"]))
+                if x2 <= x1 or y2 <= y1:
+                    continue
+                adb("shell", "input", "tap", str((x1+x2)//2), str((y1+y2)//2))
+                time.sleep(0.7)
+                return
+        if attempt < 4:
+            swipe(True)
+    raise AssertionError("UI node not found after scrolling")
 
 def text(label):
     tap_node(lambda n: n.get("text") == label)
 
 def configure(allow):
     text("Listes")
+    top()
     tap_node(lambda n: n.get("class") == "android.widget.EditText")
     adb("shell", "input", "text", NUMBER)
     ime = adb("shell", "dumpsys", "input_method")
@@ -46,10 +63,14 @@ def call(blocked):
     try:
         adb("emu", "gsm", "call", NUMBER)
         time.sleep(5)
-        calls = adb("emu", "gsm", "list")
-        assert (NUMBER.lstrip("+") not in calls) == blocked, calls
+        registry = adb("shell", "dumpsys", "telephony.registry")
+        states = re.findall(r"^\s*mCallState=(\d+)\s*$", registry, re.MULTILINE)
+        assert states, "No current telephony call state"
+        assert any(s in ("1", "2") for s in states) != blocked, states
     finally:
         subprocess.run(["adb", "emu", "gsm", "cancel", NUMBER], capture_output=True, timeout=30)
+        adb("shell", "am", "start", "-n", "fr.spamoff/.MainActivity")
+        time.sleep(0.7)
 
 try:
     out = adb("install", "-r", "app/build/outputs/apk/beta/app-beta.apk", timeout=120)
@@ -80,6 +101,7 @@ try:
     text("Listes")
     text("Supprimer")
     text("Accueil")
+    top()
     destination = Path("app/build/reports/screenshots/beta-home-api35.png")
     destination.parent.mkdir(parents=True, exist_ok=True)
     image = subprocess.run(["adb", "exec-out", "screencap", "-p"], capture_output=True, check=True, timeout=30)

@@ -1,5 +1,6 @@
 """Actual emulator Telecom callbacks, not a mock of the repository. API 35 CI only."""
 import json
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -25,12 +26,14 @@ def call_case(name, config, blocked):
     try:
         adb("emu", "gsm", "call", NUMBER)
         time.sleep(3)
-        calls = adb("emu", "gsm", "list")
+        registry = adb("shell", "dumpsys", "telephony.registry")
+        states = re.findall(r"^\s*mCallState=(\d+)\s*$", registry, re.MULTILINE)
+        if not states:
+            raise AssertionError("No current TelephonyRegistry call state found")
+        active = any(s in ("1", "2") for s in states)
         phase("assert-block" if blocked else "assert-allow")
-        if blocked and NUMBER.lstrip("+") in calls:
-            raise AssertionError("Blocked incoming call still present: " + calls)
-        if not blocked and NUMBER.lstrip("+") not in calls:
-            raise AssertionError("Allowed incoming call absent: " + calls)
+        if active == blocked:
+            raise AssertionError("Unexpected live telephony call states: " + str(states))
         results.append({"case": name, "result": "PASS"})
         print(name + ": PASS", flush=True)
     finally:

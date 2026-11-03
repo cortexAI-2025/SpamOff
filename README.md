@@ -6,7 +6,7 @@ Android 10 minimum (API 29), cible Android 16 (API 36), Samsung A14 compatible e
 
 ## Démarrer sur Samsung A14
 
-1. Installer l’APK debug fourni depuis une source autorisée. Autoriser temporairement cette source dans Android si nécessaire.
+1. Installer l’APK bêta optimisé fourni (ou le debug pour diagnostic) depuis une source autorisée. Autoriser temporairement cette source dans Android si nécessaire.
 2. Ouvrir SpamOff et toucher **Autoriser dans Android** ; choisir SpamOff comme application de filtrage.
 3. Activer le filtrage. Ajouter un numéro de test dans **Listes > Bloquer**.
 4. Facultatif : activer **Bloquer les plages d’appels automatisés**. Cette option peut bloquer des appels légitimes ; la liste blanche est prioritaire.

@@ -16,3 +16,7 @@ https://developer.android.com/google/play/requirements/target-sdk
 9. Faire approuver explicitement par le propriétaire toute soumission et publication.
 
 L’API CallScreeningService à partir d’Android 10 permet de filtrer sans READ_CALL_LOG : https://developer.android.com/develop/connectivity/telecom/dialer-app/screen-calls . L’acceptation Google Play ne peut pas être garantie à partir de la seule compilation.
+
+## Pages mémoire de 16 Kio
+
+Des bibliothèques AndroidX incluent du code natif. Avant soumission, vérifier l’alignement ZIP (`zipalign -c -P 16 4`) et les segments ELF 64 bits, puis exécuter une recette sur un appareil ou émulateur configuré en pages de 16 Kio. Les vérifications structurelles ne remplacent pas cette exécution. Référence officielle : https://developer.android.com/guide/practices/page-sizes .

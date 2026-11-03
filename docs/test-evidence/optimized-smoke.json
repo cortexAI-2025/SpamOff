@@ -1,0 +1,18 @@
+[
+  {
+    "case": "optimized_install_and_launch",
+    "result": "PASS"
+  },
+  {
+    "case": "optimized_https_update",
+    "result": "PASS"
+  },
+  {
+    "case": "optimized_blacklist_callback",
+    "result": "PASS"
+  },
+  {
+    "case": "optimized_whitelist_callback",
+    "result": "PASS"
+  }
+]

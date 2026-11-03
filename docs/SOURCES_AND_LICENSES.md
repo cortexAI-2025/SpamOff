@@ -19,3 +19,5 @@ Le code de pays des territoires ultramarins est appliqué séparément ; ne pas 
 - Tests : JUnit 4 (EPL-1.0), AndroidX Test (Apache-2.0), org.json pour tests JVM (licence JSON, dépendance **de test seulement**, pas incluse à l’APK).
 
 Les notices embarquées des dépendances ne sont pas exclues globalement du packaging. Le code original SpamOff est sous licence MIT dans LICENSE. L’icône de bouclier vectorielle est originale ; aucun logo ou visuel de Saracroche n’est repris.
+
+Une copie du texte Apache-2.0 est disponible dans [licenses/Apache-2.0.txt](licenses/Apache-2.0.txt). Les dépendances de test ne font pas partie de l’APK applicatif.

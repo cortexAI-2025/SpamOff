@@ -1,0 +1,22 @@
+[
+  {
+    "case": "personal_blacklist",
+    "result": "PASS"
+  },
+  {
+    "case": "whitelist_priority",
+    "result": "PASS"
+  },
+  {
+    "case": "protection_disabled",
+    "result": "PASS"
+  },
+  {
+    "case": "offline_blocking",
+    "result": "PASS"
+  },
+  {
+    "case": "blocking_after_reboot",
+    "result": "PASS"
+  }
+]

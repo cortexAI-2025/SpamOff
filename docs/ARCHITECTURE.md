@@ -37,3 +37,9 @@ WorkManager persiste sa planification après redémarrage, sous réserve des res
 ## API communautaire différée
 
 Aucun endpoint ni envoi de signalement n’est activé en V1. Contrat et garanties attendues : [COMMUNITY_API.md](COMMUNITY_API.md). Les signalements locaux ne deviennent jamais automatiquement des règles partagées.
+
+## Variantes de compilation
+
+`debug` conserve les classes nécessaires aux tests instrumentés. `beta` reprend les optimisations R8 et la réduction des ressources de `release`, avec une signature de test pour être installable. `release` reste non signée. Les tests instrumentés portent sur debug ; un scénario séparé installe beta et pilote son interface et de vrais callbacks Telecom émulés, sans injecter le runtime de test dans l’APK réduit.
+
+Le compteur utilise une insertion `OR IGNORE` puis un incrément dans une transaction, compatibles avec le SQLite d’Android 10. Il ne dépend pas de la syntaxe UPSERT apparue dans SQLite 3.24.

@@ -17,7 +17,7 @@ android {
  }
  buildFeatures { compose = true; buildConfig = true }
  buildTypes {
-  debug { isMinifyEnabled = true; isShrinkResources = true; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
+  debug { testProguardFiles("test-proguard-rules.pro"); isMinifyEnabled = true; isShrinkResources = true; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
   release { isMinifyEnabled = true; isShrinkResources = true; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
  }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
@@ -45,7 +45,6 @@ dependencies {
  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
  androidTestImplementation("androidx.test.ext:junit:1.2.1")
  androidTestImplementation("androidx.test:runner:1.6.2")
- androidTestImplementation("com.google.errorprone:error_prone_annotations:2.36.0")
  androidTestImplementation("androidx.test:rules:1.6.1")
  androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
 }
